@@ -1,10 +1,5 @@
 package org.seconf22;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -16,20 +11,25 @@ import org.openqa.selenium.virtualauthenticator.VirtualAuthenticator;
 import org.openqa.selenium.virtualauthenticator.VirtualAuthenticatorOptions;
 import org.openqa.selenium.virtualauthenticator.VirtualAuthenticatorOptions.Protocol;
 import org.openqa.selenium.virtualauthenticator.VirtualAuthenticatorOptions.Transport;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.testng.Assert.assertTrue;
 
-class WebAuthnTest {
+
+public class WebAuthnTest {
 
     private static WebDriver driver;
     private static VirtualAuthenticator virtualAuthenticator;
     private static List<Credential> registeredCredentials;
 
-    @BeforeAll
+    static Credential credentialadd;
+    @BeforeTest
     static void setup() {
 //        driver = WebDriverManager.chromedriver().create();
 
@@ -37,8 +37,7 @@ class WebAuthnTest {
 
     }
 
-    @Test
-    @DisplayName("WebAuthn reg and auth flow should work")
+    @Test(priority = 1)
     void sampleTest() throws InterruptedException {
 
         // set up the virtual authenticator for webauthn
@@ -74,61 +73,64 @@ class WebAuthnTest {
         assertTrue(driver.findElement(By.xpath("//h3[text()=\"You're logged in!\"]")).isDisplayed());
 
         registeredCredentials = virtualAuthenticator.getCredentials();
-        System.out.println("Registered Credentials:");
-        for (Credential credential : registeredCredentials) {
+        credentialadd = registeredCredentials.get(0);
+//        System.out.println("Registered Credentials:");
+//        for (Credential credential : registeredCredentials) {
 // Fetch the PKCS8EncodedKeySpec object representing the private key
-            PKCS8EncodedKeySpec privateKeySpec = credential.getPrivateKey();
+//            credentialadd = registeredCredentials.get(0);
+//            PKCS8EncodedKeySpec privateKeySpec = credential.getPrivateKey();
+//
+//
+//// Decode the encoded private key bytes
+//            byte[] privateKeyBytes = privateKeySpec.getEncoded();
+//
+//// Encode the private key bytes using Base64
+//            String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKeyBytes);
+//
+//            System.out.println("Private Key (Base64): " + privateKeyBase64);
+//
+//            System.out.println("RpId: " +credential.getRpId());
+//
+//            byte[] idBytes = credential.getId();
+//
+//            // Convert the byte array to a Base64-encoded string for printing
+//            String idBase64 = Base64.getEncoder().encodeToString(idBytes);
+//
+//            System.out.println("Credential Id (Base64): " + idBase64);
+//
+//            System.out.println("Sign Count " + credential.getSignCount());
 
-// Decode the encoded private key bytes
-            byte[] privateKeyBytes = privateKeySpec.getEncoded();
+//        }
 
-// Encode the private key bytes using Base64
-            String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKeyBytes);
-
-            System.out.println("Private Key (Base64): " + privateKeyBase64);
-
-            System.out.println("RpId: " +credential.getRpId());
-
-            byte[] idBytes = credential.getId();
-
-            // Convert the byte array to a Base64-encoded string for printing
-            String idBase64 = Base64.getEncoder().encodeToString(idBytes);
-
-            System.out.println("Credential Id (Base64): " + idBase64);
-
-            System.out.println("Sign Count " + credential.getSignCount());
-
-        }
+        virtualAuthenticator.removeAllCredentials();
     }
 
-//    @Test
-//    @DisplayName("WebAuthn reg and auth flow should work")
-    void testLogin() throws InterruptedException {
+    @Test(priority = 2)
+    void zebraLogin() throws InterruptedException {
 
         // Assigned values
-        String privateKeyBase64 = "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgLqcsr4uSKl+nOQAkeW1WgJr2pA8A9FGaEGBL5lfD1y6hRANCAATxUX5rK4r3gZrtKEyuU3kfTSKDW05C8m814E0QhjemE3OqV+7wGf6uMj6zTW9J+Bq2l1NEeD4lwEeXRuNluJhZ";
-        String rpId = "webauthn.io";
-        String credentialIdBase64 = "luObIryUsTl0r7IAY6/gnr7T8LdzTq9tDdxz7RSQDo4=";
-        int signCount = 0; // Assuming the sign count is an integer
-
-//// Convert the Base64-encoded private key string to a byte array
-        byte[] privateKeyBytes = Base64.getDecoder().decode(privateKeyBase64);
+//        String privateKeyBase64 = "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgLqcsr4uSKl+nOQAkeW1WgJr2pA8A9FGaEGBL5lfD1y6hRANCAATxUX5rK4r3gZrtKEyuU3kfTSKDW05C8m814E0QhjemE3OqV+7wGf6uMj6zTW9J+Bq2l1NEeD4lwEeXRuNluJhZ";
+//        String rpId = "webauthn.io";
+//        String credentialIdBase64 = "luObIryUsTl0r7IAY6/gnr7T8LdzTq9tDdxz7RSQDo4=";
+//        int signCount = 0; // Assuming the sign count is an integer
+//
+////// Convert the Base64-encoded private key string to a byte array
+//        byte[] privateKeyBytes = Base64.getDecoder().decode(privateKeyBase64);
 
         // Create a new Credential instance with the provided string values
-        Credential c = Credential.createNonResidentCredential(
-                credentialIdBase64.getBytes(),
-                rpId,
-                new PKCS8EncodedKeySpec(privateKeyBytes),
-                signCount
-        );
+//        Credential c = Credential.createNonResidentCredential(
+//                credentialIdBase64.getBytes(),
+//                rpId,
+//                new PKCS8EncodedKeySpec(privateKeyBytes),
+//                signCount
+//        );
         // set up the virtual authenticator for webauthn
-        virtualAuthenticator = setupVirtualAuthenticator();
 
         // Assuming authenticator is initialized
         virtualAuthenticator = ((HasVirtualAuthenticator) driver).addVirtualAuthenticator(new VirtualAuthenticatorOptions());
         // Add the new Credential instance to the authenticator
-
-        virtualAuthenticator.addCredential(c);
+//        virtualAuthenticator = setupVirtualAuthenticator();
+        virtualAuthenticator.addCredential(credentialadd);
 
         // Login to WebAuthn.io
 
@@ -160,6 +162,7 @@ class WebAuthnTest {
         }
         assertTrue(driver.findElement(By.xpath("//h3[text()=\"You're logged in!\"]")).isDisplayed());
 
+        virtualAuthenticator.removeAllCredentials();
 
     }
 
@@ -172,7 +175,7 @@ class WebAuthnTest {
         return ((HasVirtualAuthenticator) driver).addVirtualAuthenticator(options);
     }
 
-    @AfterAll
+    @AfterTest
     static void cleanup() {
         virtualAuthenticator.removeAllCredentials();
         driver.quit();
