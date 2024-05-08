@@ -15,12 +15,9 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
 import java.util.List;
 
 import static org.testng.Assert.assertTrue;
-
 
 public class WebAuthnTest {
 
@@ -28,31 +25,25 @@ public class WebAuthnTest {
     private static VirtualAuthenticator virtualAuthenticator;
     private static List<Credential> registeredCredentials;
 
-    static Credential credentialadd;
     @BeforeTest
     static void setup() {
-//        driver = WebDriverManager.chromedriver().create();
-
+        // Initialize WebDriver
         driver = new ChromeDriver();
-
     }
 
     @Test(priority = 1)
-    void sampleTest() throws InterruptedException {
-
-        // set up the virtual authenticator for webauthn
+    void testPasskeyEnrollmentAndLogin() throws InterruptedException {
+        // Set up the virtual authenticator for WebAuthn testing
         virtualAuthenticator = setupVirtualAuthenticator();
 
-
-
-        // start registration
+        // Navigate to the enrollment page
         driver.get("https://webauthn.io");
         driver.findElement(By.id("input-email")).sendKeys("seconf22");
 
-        WebElement ele1 = driver.findElement(By.className("btn-secondary"));
-        ele1.click();
+        // Initiate enrollment process
+        driver.findElement(By.className("btn-secondary")).click();
 
-
+        // Select enrollment options
         Select selectAttestationType = new Select(driver.findElement(By.id("attestation")));
         selectAttestationType.selectByVisibleText("Direct");
 
@@ -61,123 +52,66 @@ public class WebAuthnTest {
 
         driver.findElement(By.id("register-button")).click();
 
-        // registration should be successful
+        // Verify enrollment success
         Thread.sleep(3000);
         assertTrue(driver.findElement(By.xpath("//div[contains(text(),'Success!')]")).isDisplayed());
 
-        // start authentication
+        // Start authentication process
         driver.findElement(By.id("login-button")).click();
 
-        // authentication should be successful
+        // Verify authentication success
         Thread.sleep(3000);
         assertTrue(driver.findElement(By.xpath("//h3[text()=\"You're logged in!\"]")).isDisplayed());
 
+        // Retrieve registered credentials
         registeredCredentials = virtualAuthenticator.getCredentials();
-        credentialadd = registeredCredentials.get(0);
-//        System.out.println("Registered Credentials:");
-//        for (Credential credential : registeredCredentials) {
-// Fetch the PKCS8EncodedKeySpec object representing the private key
-//            credentialadd = registeredCredentials.get(0);
-//            PKCS8EncodedKeySpec privateKeySpec = credential.getPrivateKey();
-//
-//
-//// Decode the encoded private key bytes
-//            byte[] privateKeyBytes = privateKeySpec.getEncoded();
-//
-//// Encode the private key bytes using Base64
-//            String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKeyBytes);
-//
-//            System.out.println("Private Key (Base64): " + privateKeyBase64);
-//
-//            System.out.println("RpId: " +credential.getRpId());
-//
-//            byte[] idBytes = credential.getId();
-//
-//            // Convert the byte array to a Base64-encoded string for printing
-//            String idBase64 = Base64.getEncoder().encodeToString(idBytes);
-//
-//            System.out.println("Credential Id (Base64): " + idBase64);
-//
-//            System.out.println("Sign Count " + credential.getSignCount());
 
-//        }
+//        virtualAuthenticator.removeAllCredentials();
 
-        virtualAuthenticator.removeAllCredentials();
+
+        // Optionally, perform further validation or logging of registered credentials
+
+        // Logout or navigate to the logout page
+        // Example: driver.findElement(By.id("logout-button")).click();
     }
 
     @Test(priority = 2)
-    void zebraLogin() throws InterruptedException {
+    void testPasskeyLoginWithPreviousCredentials() throws InterruptedException {
 
-        // Assigned values
-//        String privateKeyBase64 = "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgLqcsr4uSKl+nOQAkeW1WgJr2pA8A9FGaEGBL5lfD1y6hRANCAATxUX5rK4r3gZrtKEyuU3kfTSKDW05C8m814E0QhjemE3OqV+7wGf6uMj6zTW9J+Bq2l1NEeD4lwEeXRuNluJhZ";
-//        String rpId = "webauthn.io";
-//        String credentialIdBase64 = "luObIryUsTl0r7IAY6/gnr7T8LdzTq9tDdxz7RSQDo4=";
-//        int signCount = 0; // Assuming the sign count is an integer
-//
-////// Convert the Base64-encoded private key string to a byte array
-//        byte[] privateKeyBytes = Base64.getDecoder().decode(privateKeyBase64);
+//        System.out.println("Registered Credentials:"+registeredCredentials.size());
+//        // Add the previously enrolled credentials for the same user
+//        for (Credential credential : registeredCredentials) {
+//            virtualAuthenticator.addCredential(credential);
+//        }
 
-        // Create a new Credential instance with the provided string values
-//        Credential c = Credential.createNonResidentCredential(
-//                credentialIdBase64.getBytes(),
-//                rpId,
-//                new PKCS8EncodedKeySpec(privateKeyBytes),
-//                signCount
-//        );
-        // set up the virtual authenticator for webauthn
-
-        // Assuming authenticator is initialized
-        virtualAuthenticator = ((HasVirtualAuthenticator) driver).addVirtualAuthenticator(new VirtualAuthenticatorOptions());
-        // Add the new Credential instance to the authenticator
-//        virtualAuthenticator = setupVirtualAuthenticator();
-        virtualAuthenticator.addCredential(credentialadd);
-
-        // Login to WebAuthn.io
-
+        // Navigate to the login page
         driver.get("https://webauthn.io");
         driver.findElement(By.id("input-email")).sendKeys("seconf22");
 
-        // start authentication
+        // Start authentication process
         driver.findElement(By.id("login-button")).click();
 
-        // authentication should be successful
+        // Verify authentication success
         Thread.sleep(3000);
-
-
-        registeredCredentials = virtualAuthenticator.getCredentials();
-        System.out.println("Registered Credentials:");
-        for (Credential credential : registeredCredentials) {
-// Fetch the PKCS8EncodedKeySpec object representing the private key
-            PKCS8EncodedKeySpec privateKeySpec = credential.getPrivateKey();
-
-// Decode the encoded private key bytes
-            byte[] privateKeyBytes01 = privateKeySpec.getEncoded();
-
-// Encode the private key bytes using Base64
-            String privateKeyBase6401 = Base64.getEncoder().encodeToString(privateKeyBytes01);
-
-            System.out.println("Private Key (Base64): " + privateKeyBase6401);
-
-
-        }
         assertTrue(driver.findElement(By.xpath("//h3[text()=\"You're logged in!\"]")).isDisplayed());
-
-        virtualAuthenticator.removeAllCredentials();
-
-    }
-
-    private VirtualAuthenticator setupVirtualAuthenticator() {
-        VirtualAuthenticatorOptions options = new VirtualAuthenticatorOptions();
-        options.setTransport(Transport.INTERNAL)
-                .setProtocol(Protocol.CTAP2)
-                .setHasUserVerification(true)
-                .setIsUserVerified(true);
-        return ((HasVirtualAuthenticator) driver).addVirtualAuthenticator(options);
     }
 
     @AfterTest
     static void cleanup() {
-        virtualAuthenticator.removeAllCredentials();
-        driver.quit();
+        // Remove all credentials from the virtual authenticator and quit the WebDriver
+//        virtualAuthenticator.removeAllCredentials();
+//        driver.quit();
+    }
+
+    private VirtualAuthenticator setupVirtualAuthenticator() {
+        // Configure options for the virtual authenticator
+        VirtualAuthenticatorOptions options = new VirtualAuthenticatorOptions()
+                .setTransport(Transport.INTERNAL)
+                .setProtocol(Protocol.CTAP2)
+                .setHasUserVerification(true)
+                .setIsUserVerified(true);
+
+        // Add the virtual authenticator with specified options
+        return ((HasVirtualAuthenticator) driver).addVirtualAuthenticator(options);
     }
 }
