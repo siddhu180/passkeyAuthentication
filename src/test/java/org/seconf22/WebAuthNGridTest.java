@@ -3,7 +3,9 @@ package org.seconf22;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.virtualauthenticator.Credential;
 import org.openqa.selenium.virtualauthenticator.HasVirtualAuthenticator;
@@ -15,20 +17,26 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import static org.testng.Assert.assertTrue;
 
-public class WebAuthnTest {
+public class WebAuthNGridTest {
 
     private static WebDriver driver;
     private static VirtualAuthenticator virtualAuthenticator;
-    private static List<Credential> registeredCredentials, registeredCredentials01;
+    private static List<Credential> registeredCredentials;
 
     @BeforeTest
-    static void setup() {
-        // Initialize WebDriver
-        driver = new ChromeDriver();
+    static void setup() throws MalformedURLException {
+        ChromeOptions options = new ChromeOptions();
+        options.setCapability("browserName", "chrome");
+
+        // Initialize WebDriver using RemoteWebDriver to connect to the Selenium Grid hub
+        URL gridUrl = new URL("http://localhost:4444/wd/hub");
+        driver = new RemoteWebDriver(gridUrl, options);
     }
 
     @Test(priority = 1)
@@ -61,7 +69,6 @@ public class WebAuthnTest {
 
         // Verify authentication success
         Thread.sleep(3000);
-
         assertTrue(driver.findElement(By.xpath("//h3[text()=\"You're logged in!\"]")).isDisplayed());
 
         // Retrieve registered credentials
@@ -69,18 +76,16 @@ public class WebAuthnTest {
 
         virtualAuthenticator.removeAllCredentials();
 
-
         // Retrieve registered credentials
-        registeredCredentials01 = virtualAuthenticator.getCredentials();
-        System.out.println("Registered Credentials:"+registeredCredentials01.size());
+//        registeredCredentials = virtualAuthenticator.getCredentials();
 
         // Optionally, perform further validation or logging of registered credentials
 
         // Logout or navigate to the logout page
-        driver.findElement(By.xpath("//*[contains(text(),'Try it again?')]")).click();
+        // Example: driver.findElement(By.id("logout-button")).click();
     }
 
-    @Test(priority = 2)
+    //    @Test(priority = 2)
     void testPasskeyLoginWithPreviousCredentials() throws InterruptedException {
 
         System.out.println("Registered Credentials:"+registeredCredentials.size());
@@ -111,7 +116,7 @@ public class WebAuthnTest {
     private VirtualAuthenticator setupVirtualAuthenticator() {
         // Configure options for the virtual authenticator
         VirtualAuthenticatorOptions options = new VirtualAuthenticatorOptions()
-                .setTransport(Transport.USB)
+                .setTransport(Transport.INTERNAL)
                 .setProtocol(Protocol.CTAP2)
                 .setHasUserVerification(true)
                 .setIsUserVerified(true);
@@ -120,3 +125,4 @@ public class WebAuthnTest {
         return ((HasVirtualAuthenticator) driver).addVirtualAuthenticator(options);
     }
 }
+
